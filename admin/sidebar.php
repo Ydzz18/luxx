@@ -1,6 +1,10 @@
 <?php
 $currentPage = basename($_SERVER['PHP_SELF'], '.php');
-require_once 'auth.php';
+
+// Make sure auth.php is loaded
+if (!function_exists('canDo')) {
+    require_once __DIR__ . '/auth.php';
+}
 ?>
 <aside class="admin-sidebar">
     <div class="sidebar-header">
@@ -15,16 +19,23 @@ require_once 'auth.php';
         </a>
         
         <!-- Orders - All roles -->
-        <a href="order.php" class="<?= $currentPage === 'orders' ? 'active' : '' ?>">
+        <?php if (canDo('orders', 'view')): ?>
+        <a href="orders.php" class="<?= $currentPage === 'orders' ? 'active' : '' ?>">
             <span class="icon">📦</span> Orders
             <?php
-            require_once '../Order.php';
-            $o = new Order();
-            $s = $o->getStats();
-            if ($s['pending_orders'] > 0): ?>
-            <span class="badge"><?= $s['pending_orders'] ?></span>
-            <?php endif; ?>
+            try {
+                require_once __DIR__ . '/../Order.php';  // This stays the same - goes to project root
+                $o = new Order();
+                $s = $o->getStats();
+                if (isset($s['pending_orders']) && $s['pending_orders'] > 0): ?>
+                <span class="badge"><?= $s['pending_orders'] ?></span>
+                <?php endif;
+            } catch (Exception $e) {
+                // Silently fail if Order class unavailable
+            }
+            ?>
         </a>
+        <?php endif; ?>
         
         <!-- Products - All can view, but show based on permission -->
         <?php if (canDo('products', 'view')): ?>
@@ -52,12 +63,17 @@ require_once 'auth.php';
         <a href="feedback.php" class="<?= $currentPage === 'feedback' ? 'active' : '' ?>">
             <span class="icon">💬</span> Feedback
             <?php
-            require_once '../Feedback.php';
-            $fb = new Feedback();
-            $fbCounts = $fb->getCounts();
-            if ($fbCounts['new'] > 0): ?>
-            <span class="badge"><?= $fbCounts['new'] ?></span>
-            <?php endif; ?>
+            try {
+                require_once __DIR__ . '/../Feedback.php';  // This stays the same - goes to project root
+                $fb = new Feedback();
+                $fbCounts = $fb->getCounts();
+                if (isset($fbCounts['new']) && $fbCounts['new'] > 0): ?>
+                <span class="badge"><?= $fbCounts['new'] ?></span>
+                <?php endif;
+            } catch (Exception $e) {
+                // Silently fail if Feedback class unavailable
+            }
+            ?>
         </a>
         <?php endif; ?>
         
@@ -77,7 +93,7 @@ require_once 'auth.php';
         </a>
         <?php endif; ?>
         
-        <a href="../index.html" target="_blank">
+        <a href="../index.php" target="_blank">
             <span class="icon">🌐</span> View Store
         </a>
         
@@ -89,7 +105,7 @@ require_once 'auth.php';
     <!-- Current User Info -->
     <div style="padding: 15px 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
         <p style="color: rgba(255,255,255,0.5); font-size: 12px;">Logged in as:</p>
-        <p style="color: #fff; font-size: 14px;"><?= htmlspecialchars($_SESSION['admin_name'] ?? 'User') ?></p>
+        <p style="color: #fff; font-size: 14px; margin: 5px 0;"><?= htmlspecialchars($_SESSION['admin_name'] ?? 'User') ?></p>
         <?= getRoleBadge(getRole()) ?>
     </div>
 </aside>

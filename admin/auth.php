@@ -1,10 +1,10 @@
 <?php
 /**
- * Admin Authentication & Role-Based Access Control
+ * Admin Authentication & Role-Based Access Control - FIXED
  * Include this at the top of every admin page
  */
 
-require_once '../config.php';
+require_once __DIR__ . '/../config.php';
 
 // Check if logged in
 function requireLogin() {
@@ -119,4 +119,3 @@ function getRoleBadge($role) {
     $style = $colors[$role] ?? $colors['staff'];
     return "<span style='padding: 4px 12px; border-radius: 15px; font-size: 12px; font-weight: 600; text-transform: uppercase; $style'>" . ucfirst($role) . "</span>";
 }
-?>

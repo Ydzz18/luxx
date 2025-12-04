@@ -6,18 +6,37 @@ require_once '../Product.php';
 require_once '../Order.php';
 
 $order = new Order();
-$stats = $order->getStats();
-$recentOrders = $order->getAll(null, 5);
-
 $product = new Product();
-$totalProducts = count($product->getAll());
+
+// Get stats with proper error handling
+try {
+    $stats = $order->getStats();
+    
+    // Ensure all stats have default values
+    $stats['total_orders'] = $stats['total_orders'] ?? 0;
+    $stats['total_revenue'] = $stats['total_revenue'] ?? 0;
+    $stats['pending_orders'] = $stats['pending_orders'] ?? 0;
+    
+    // Get recent orders
+    $recentOrders = $order->getAll(null, 5);
+    
+    // Get total products
+    $totalProducts = count($product->getAll());
+    
+} catch (Exception $e) {
+    error_log("Dashboard error: " . $e->getMessage());
+    
+    // Set default values if error occurs
+    $stats = [
+        'total_orders' => 0,
+        'total_revenue' => 0,
+        'pending_orders' => 0
+    ];
+    $recentOrders = [];
+    $totalProducts = 0;
+}
 
 $role = getRole();
-
-// Fix for deprecated warning - ensure numeric values
-$stats['total_orders'] = $stats['total_orders'] ?? 0;
-$stats['total_revenue'] = $stats['total_revenue'] ?? 0;
-$stats['pending_orders'] = $stats['pending_orders'] ?? 0;
 
 $pageTitle = 'Dashboard';
 include 'includes/header.php';
@@ -25,7 +44,7 @@ include 'includes/header.php';
 
             <?php if (isset($_SESSION['error_msg'])): ?>
             <div style="background: #f8d7da; color: #721c24; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px;">
-                <?= $_SESSION['error_msg']; unset($_SESSION['error_msg']); ?>
+                <?= htmlspecialchars($_SESSION['error_msg']); unset($_SESSION['error_msg']); ?>
             </div>
             <?php endif; ?>
 
@@ -33,7 +52,7 @@ include 'includes/header.php';
                 <div class="stat-card">
                     <div class="stat-icon">📦</div>
                     <div class="stat-info">
-                        <h3><?= number_format($stats['total_orders']) ?></h3>
+                        <h3><?= number_format((int)$stats['total_orders']) ?></h3>
                         <p>Total Orders</p>
                     </div>
                 </div>
@@ -42,7 +61,7 @@ include 'includes/header.php';
                 <div class="stat-card">
                     <div class="stat-icon">💰</div>
                     <div class="stat-info">
-                        <h3>₱<?= number_format($stats['total_revenue'], 2) ?></h3>
+                        <h3>₱<?= number_format((float)$stats['total_revenue'], 2) ?></h3>
                         <p>Total Revenue</p>
                     </div>
                 </div>
@@ -51,7 +70,7 @@ include 'includes/header.php';
                 <div class="stat-card">
                     <div class="stat-icon">⏳</div>
                     <div class="stat-info">
-                        <h3><?= number_format($stats['pending_orders']) ?></h3>
+                        <h3><?= number_format((int)$stats['pending_orders']) ?></h3>
                         <p>Pending Orders</p>
                     </div>
                 </div>
@@ -59,7 +78,7 @@ include 'includes/header.php';
                 <div class="stat-card">
                     <div class="stat-icon">🛍️</div>
                     <div class="stat-info">
-                        <h3><?= number_format($totalProducts) ?></h3>
+                        <h3><?= number_format((int)$totalProducts) ?></h3>
                         <p>Products</p>
                     </div>
                 </div>
@@ -68,23 +87,30 @@ include 'includes/header.php';
             <div class="dashboard-grid">
                 <div class="dashboard-card">
                     <h2>Recent Orders</h2>
-                    <table class="data-table">
-                        <thead>
-                            <tr><th>Order #</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($recentOrders as $o): ?>
-                            <tr>
-                                <td><a href="orders.php?id=<?= $o['id'] ?>"><?= $o['order_number'] ?></a></td>
-                                <td><?= htmlspecialchars($o['shipping_name']) ?></td>
-                                <td>₱<?= number_format($o['total'], 2) ?></td>
-                                <td><span class="status-badge status-<?= $o['status'] ?>"><?= ucfirst($o['status']) ?></span></td>
-                                <td><?= date('M j, Y', strtotime($o['created_at'])) ?></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                    <a href="orders.php" class="view-all">View All Orders →</a>
+                    <?php if (empty($recentOrders)): ?>
+                        <div style="text-align: center; padding: 40px; color: #888;">
+                            <p style="font-size: 18px; margin-bottom: 10px;">📦</p>
+                            <p>No orders yet</p>
+                        </div>
+                    <?php else: ?>
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Order #</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th></tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($recentOrders as $o): ?>
+                                <tr>
+                                    <td><a href="orders.php?id=<?= $o['id'] ?>"><?= htmlspecialchars($o['order_number']) ?></a></td>
+                                    <td><?= htmlspecialchars($o['shipping_name']) ?></td>
+                                    <td>₱<?= number_format((float)$o['total'], 2) ?></td>
+                                    <td><span class="status-badge status-<?= $o['status'] ?>"><?= ucfirst($o['status']) ?></span></td>
+                                    <td><?= date('M j, Y', strtotime($o['created_at'])) ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        <a href="orders.php" class="view-all">View All Orders →</a>
+                    <?php endif; ?>
                 </div>
 
                 <div class="dashboard-card">

@@ -39,16 +39,7 @@ $defaults = [
     'allow_guest_checkout' => '1'
 ];
 
-// Get current settings
-function getSetting($key) {
-    global $pdo, $defaults;
-    $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = ?");
-    $stmt->execute([$key]);
-    $result = $stmt->fetch();
-    return $result ? $result['setting_value'] : ($defaults[$key] ?? '');
-}
-
-// Save setting
+// Save setting (insert or update)
 function saveSetting($key, $value) {
     global $pdo;
     $stmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) 
@@ -153,57 +144,157 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tab = 'account';
     }
 }
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LuxStore Admin | Settings</title>
-    <link rel="stylesheet" href="admin-styles.css">
-    <style>
-        .settings-container { display: grid; grid-template-columns: 220px 1fr; gap: 30px; }
-        .settings-nav { background: #fff; border-radius: 12px; padding: 20px; height: fit-content; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .settings-nav a { display: flex; align-items: center; gap: 10px; padding: 12px 15px; color: #333; text-decoration: none; border-radius: 8px; margin-bottom: 5px; transition: all 0.2s; }
-        .settings-nav a:hover, .settings-nav a.active { background: rgba(212, 175, 55, 0.1); color: #d4af37; }
-        .settings-nav a .icon { font-size: 18px; }
-        .settings-content { background: #fff; border-radius: 12px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .settings-content h2 { margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; color: #1a1a2e; }
-        .form-section { margin-bottom: 30px; padding-bottom: 30px; border-bottom: 1px solid #eee; }
-        .form-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .form-section h3 { font-size: 16px; color: #666; margin-bottom: 15px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #333; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #d4af37; outline: none; }
-        .form-group small { color: #888; font-size: 13px; margin-top: 5px; display: block; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
-        .toggle-group { display: flex; align-items: center; gap: 10px; }
-        .toggle-group input[type="checkbox"] { width: 20px; height: 20px; accent-color: #d4af37; }
-        .btn-save { background: linear-gradient(45deg, #d4af37, #b8860b); color: #000; padding: 12px 30px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
-        .btn-save:hover { filter: brightness(1.1); }
-        .success-msg { background: #d4edda; color: #155724; padding: 15px 20px; border-radius: 8px; margin-bottom: 25px; }
-        .error-msg { background: #f8d7da; color: #721c24; padding: 15px 20px; border-radius: 8px; margin-bottom: 25px; }
-        .danger-zone { background: #fff5f5; border: 1px solid #fed7d7; border-radius: 8px; padding: 20px; margin-top: 20px; }
-        .danger-zone h3 { color: #c53030; margin-bottom: 10px; }
-        .danger-zone p { color: #666; font-size: 14px; margin-bottom: 15px; }
-        .btn-danger { background: #e74c3c; color: #fff; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
-        @media (max-width: 800px) { .settings-container { grid-template-columns: 1fr; } .form-row, .form-row-3 { grid-template-columns: 1fr; } }
-    </style>
-</head>
-<body>
-    <div class="admin-wrapper">
-        <?php include 'sidebar.php'; ?>
 
-        <main class="admin-main">
-            <header class="admin-header">
-                <h1>Settings</h1>
-                <div class="header-right">
-                    <?= getRoleBadge(getRole()) ?>
-                    <a href="logout.php" class="btn-logout">Logout</a>
-                </div>
-            </header>
+$pageTitle = 'Settings';
+$pageStyles = '
+    .settings-container {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 30px;
+    }
+    .settings-nav {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        height: fit-content;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .settings-nav a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 15px;
+        color: #333;
+        text-decoration: none;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        transition: all 0.2s;
+    }
+    .settings-nav a:hover,
+    .settings-nav a.active {
+        background: rgba(212, 175, 55, 0.1);
+        color: #d4af37;
+    }
+    .settings-nav a .icon {
+        font-size: 18px;
+    }
+    .settings-content {
+        background: #fff;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .settings-content h2 {
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        color: #1a1a2e;
+    }
+    .form-section {
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 1px solid #eee;
+    }
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    .form-section h3 {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 15px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 15px;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        border-color: #d4af37;
+        outline: none;
+    }
+    .form-group small {
+        color: #888;
+        font-size: 13px;
+        margin-top: 5px;
+        display: block;
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .form-row-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+    }
+    .toggle-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .toggle-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #d4af37;
+    }
+    .btn-save {
+        background: linear-gradient(45deg, #d4af37, #b8860b);
+        color: #000;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 15px;
+    }
+    .btn-save:hover {
+        filter: brightness(1.1);
+    }
+    .success-msg {
+        background: #d4edda;
+        color: #155724;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+    }
+    .error-msg {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+    }
+    @media (max-width: 800px) {
+        .settings-container {
+            grid-template-columns: 1fr;
+        }
+        .form-row,
+        .form-row-3 {
+            grid-template-columns: 1fr;
+        }
+    }
+';
+
+include 'includes/header.php';
+?>
 
             <?php if ($message): ?><div class="success-msg">✓ <?= $message ?></div><?php endif; ?>
             <?php if ($error): ?><div class="error-msg"><?= $error ?></div><?php endif; ?>

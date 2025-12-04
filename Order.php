@@ -11,7 +11,9 @@ class Order {
         $this->db = db();
     }
     
-    // Create new order
+    /**
+     * Create new order
+     */
     public function create($cartItems, $shippingData, $userId = null) {
         // Validate cart items first
         if (empty($cartItems)) {
@@ -167,89 +169,181 @@ class Order {
         }
     }
     
-    // Get order by ID
+    /**
+     * Get order by ID
+     */
     public function getById($id) {
-        $stmt = $this->db->prepare("SELECT * FROM orders WHERE id = ?");
-        $stmt->execute([$id]);
-        return $stmt->fetch();
-    }
-    
-    // Get order by order number
-    public function getByOrderNumber($orderNumber) {
-        $stmt = $this->db->prepare("SELECT * FROM orders WHERE order_number = ?");
-        $stmt->execute([$orderNumber]);
-        return $stmt->fetch();
-    }
-    
-    // Get order items
-    public function getItems($orderId) {
-        $stmt = $this->db->prepare(
-            "SELECT oi.*, p.image 
-             FROM order_items oi 
-             LEFT JOIN products p ON oi.product_id = p.id 
-             WHERE oi.order_id = ?"
-        );
-        $stmt->execute([$orderId]);
-        return $stmt->fetchAll();
-    }
-    
-    // Get all orders (admin)
-    public function getAll($status = null, $limit = 50, $offset = 0) {
-        $sql = "SELECT o.*, u.email as user_email 
-                FROM orders o 
-                LEFT JOIN users u ON o.user_id = u.id";
-        if ($status) $sql .= " WHERE o.status = :status";
-        $sql .= " ORDER BY o.created_at DESC LIMIT :limit OFFSET :offset";
-        
-        $stmt = $this->db->prepare($sql);
-        if ($status) $stmt->bindValue(':status', $status);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll();
-    }
-    
-    // Update order status (admin)
-    public function updateStatus($orderId, $status, $sendEmail = true) {
-        $stmt = $this->db->prepare(
-            "UPDATE orders SET status = ? WHERE id = ?"
-        );
-        $result = $stmt->execute([$status, $orderId]);
-        
-        // Send status update email
-        if ($result && $sendEmail) {
-            try {
-                $order = $this->getById($orderId);
-                $mailer = new Mailer();
-                $mailer->sendStatusUpdate($order, $status);
-            } catch (Exception $e) {
-                error_log("Status update email failed: " . $e->getMessage());
-            }
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM orders WHERE id = ? LIMIT 1");
+            $stmt->execute([$id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("getById order error: " . $e->getMessage());
+            return null;
         }
-        
-        return $result;
     }
     
-    // Update payment status (admin)
+    /**
+     * Get order by order number
+     */
+    public function getByOrderNumber($orderNumber) {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM orders WHERE order_number = ? LIMIT 1");
+            $stmt->execute([$orderNumber]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("getByOrderNumber error: " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Get order items
+     */
+    public function getItems($orderId) {
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT oi.*, p.image 
+                 FROM order_items oi 
+                 LEFT JOIN products p ON oi.product_id = p.id 
+                 WHERE oi.order_id = ?"
+            );
+            $stmt->execute([$orderId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("getItems error: " . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Get all orders with optional filtering (admin)
+     */
+    public function getAll($status = null, $limit = 50, $offset = 0) {
+        try {
+            $sql = "SELECT o.*, u.email as user_email,
+                    (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) as total_items
+                    FROM orders o 
+                    LEFT JOIN users u ON o.user_id = u.id";
+            
+            $params = [];
+            
+            if ($status) {
+                $sql .= " WHERE o.status = ?";
+                $params[] = $status;
+            }
+            
+            $sql .= " ORDER BY o.created_at DESC";
+            
+            if ($limit) {
+                $sql .= " LIMIT ?";
+                $params[] = (int)$limit;
+            }
+            
+            if ($offset) {
+                $sql .= " OFFSET ?";
+                $params[] = (int)$offset;
+            }
+            
+            $stmt = $this->db->prepare($sql);
+            
+            // Bind parameters with proper types
+            $paramIndex = 1;
+            foreach ($params as $param) {
+                $type = is_int($param) ? PDO::PARAM_INT : PDO::PARAM_STR;
+                $stmt->bindValue($paramIndex++, $param, $type);
+            }
+            
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+        } catch (PDOException $e) {
+            error_log("getAll orders error: " . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Update order status (admin)
+     */
+    public function updateStatus($orderId, $status, $sendEmail = true) {
+        try {
+            $stmt = $this->db->prepare(
+                "UPDATE orders SET status = ?, updated_at = NOW() WHERE id = ?"
+            );
+            $result = $stmt->execute([$status, $orderId]);
+            
+            // Send status update email
+            if ($result && $sendEmail) {
+                try {
+                    $order = $this->getById($orderId);
+                    $mailer = new Mailer();
+                    $mailer->sendStatusUpdate($order, $status);
+                } catch (Exception $e) {
+                    error_log("Status update email failed: " . $e->getMessage());
+                }
+            }
+            
+            return $result;
+        } catch (PDOException $e) {
+            error_log("updateStatus error: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Update payment status (admin)
+     */
     public function updatePaymentStatus($orderId, $status) {
-        $stmt = $this->db->prepare(
-            "UPDATE orders SET payment_status = ? WHERE id = ?"
-        );
-        return $stmt->execute([$status, $orderId]);
+        try {
+            $stmt = $this->db->prepare(
+                "UPDATE orders SET payment_status = ?, updated_at = NOW() WHERE id = ?"
+            );
+            return $stmt->execute([$status, $orderId]);
+        } catch (PDOException $e) {
+            error_log("updatePaymentStatus error: " . $e->getMessage());
+            return false;
+        }
     }
     
-    // Get order statistics (admin dashboard) - FIXED WITH avg_order_value
+    /**
+     * Get order statistics (admin dashboard) - FIXED WITH ERROR HANDLING
+     */
     public function getStats() {
-        $stmt = $this->db->query("
-            SELECT 
-                COUNT(*) as total_orders,
-                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_orders,
-                COALESCE(SUM(total), 0) as total_revenue,
-                COALESCE(AVG(total), 0) as avg_order_value
-            FROM orders
-        ");
-        
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        try {
+            $stmt = $this->db->query("
+                SELECT 
+                    COUNT(*) as total_orders,
+                    COALESCE(SUM(total), 0) as total_revenue,
+                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_orders,
+                    COALESCE(AVG(total), 0) as avg_order_value
+                FROM orders
+            ");
+            
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Ensure all values exist and are properly typed
+            $totalOrders = (int)($result['total_orders'] ?? 0);
+            $totalRevenue = (float)($result['total_revenue'] ?? 0);
+            $pendingOrders = (int)($result['pending_orders'] ?? 0);
+            $avgOrderValue = (float)($result['avg_order_value'] ?? 0);
+            
+            return [
+                'total_orders' => $totalOrders,
+                'total_revenue' => $totalRevenue,
+                'pending_orders' => $pendingOrders,
+                'avg_order_value' => $avgOrderValue
+            ];
+            
+        } catch (PDOException $e) {
+            error_log("getStats error: " . $e->getMessage());
+            return [
+                'total_orders' => 0,
+                'total_revenue' => 0,
+                'pending_orders' => 0,
+                'avg_order_value' => 0
+            ];
+        }
     }
 }
 ?>
