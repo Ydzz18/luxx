@@ -1,0 +1,744 @@
+/* =========================================================
+   LUXSTORE – BLACK & GOLD PREMIUM THEME (A4 GRADIENT)
+   One CSS file for all pages
+   ========================================================= */
+
+/* -------------------- GLOBAL STYLES -------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  line-height: 1.6;
+}
+
+a {
+  color: #d4af37;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+a:hover {
+  color: #b8860b;
+}
+
+/* GOLD GRADIENT */
+.gold {
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Divider */
+.divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, #d4af37, #b8860b);
+  margin: 40px auto;
+  width: 90%;
+}
+
+/* Fade animation */
+.fade-in {
+  animation: fadeIn 1.2s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================================
+   HEADER + NAVBAR
+   ========================================================= */
+.header {
+  background: #000;
+  padding: 15px 40px;
+  border-bottom: 1px solid #2a2a2a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo img {
+  width: 50px;
+  height: 50px;
+}
+
+.logo h1 {
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.navbar a {
+  font-weight: 500;
+  padding: 6px 10px;
+}
+
+.navbar a:hover {
+  color: #fff;
+}
+
+/* Dropdown */
+.dropdown {
+  position: relative;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background: #111;
+  min-width: 150px;
+  border: 1px solid #333;
+  border-radius: 6px;
+}
+
+.dropdown-content a {
+  display: block;
+  padding: 10px;
+  color: #d4af37;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* Mobile Menu Button */
+.mobile-menu-btn {
+  display: none;
+  font-size: 28px;
+  color: #d4af37;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+  transform: scale(1.1);
+}
+
+/* =========================================================
+   ABOUT PAGE 
+   ========================================================= */
+
+/* Page Header */
+.page-header {
+  text-align: center;
+  padding: 60px 20px;
+  background: #000;
+}
+
+.page-header h1 {
+  font-size: 42px;
+  font-weight: 700;
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.page-header p {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #ddd;
+}
+
+/* Main About Sections */
+.mission-section {
+  padding: 50px 20px;
+  max-width: 900px;
+  margin: auto;
+  line-height: 1.7;
+}
+
+.mission-section h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mission-section p {
+  font-size: 18px;
+  color: #ddd;
+}
+
+/* Content Boxes */
+.mission-box {
+  background: #111;
+  padding: 25px;
+  margin-top: 25px;
+  border-left: 5px solid #d4af37;
+  border-radius: 8px;
+  border: 1px solid #333;
+  transition: 0.3s;
+}
+
+.mission-box h3 {
+  font-size: 22px;
+  margin-bottom: 8px;
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mission-box:hover {
+  transform: translateY(-4px);
+  border-color: #b8860b;
+}
+
+/* =========================================================
+   HOME SECTION
+   ========================================================= */
+.home {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px;
+  gap: 40px;
+}
+
+/* 🌟 Floating Animation for Home Image */
+.home img {
+  width: 400px;
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+  animation: floatUpDown 4s ease-in-out infinite, glowPulse 3s ease-in-out infinite;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 🫧 Smooth floating up & down motion */
+@keyframes floatUpDown {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+/* ✨ Gentle glowing effect */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+  }
+}
+
+.home-left img {
+  width: 250px;
+  filter: drop-shadow(0 0 10px #b8860b);
+}
+
+.home-right h2 {
+  font-size: 36px;
+}
+
+.highlight {
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.btn-primary {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 12px 25px;
+  border-radius: 5px;
+  font-weight: bold;
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  color: #000;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.2);
+}
+
+/* =========================================================
+   CATEGORY CARDS
+   ========================================================= */
+.categories {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.category-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 40px;
+  margin-top: 30px;
+}
+
+.category-card {
+  background: #111;
+  border: 1px solid #333;
+  padding: 20px;
+  width: 200px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.3s;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  border-color: #d4af37;
+}
+
+.category-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: contain;
+  transition: transform 0.3s;
+}
+
+.category-card:hover img {
+  transform: scale(1.05);
+}
+
+/* =========================================================
+   OWNER / FOUNDERS PAGE
+   ========================================================= */
+.owners-page {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 30px;
+}
+
+.owner-profile {
+  background: #111;
+  padding: 20px;
+  border-radius: 10px;
+  width: 280px;
+  text-align: center;
+  border: 1px solid #333;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.owner-profile:hover {
+  transform: translateY(-5px);
+  border-color: #d4af37;
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.2);
+}
+
+.owner-profile img {
+  width: 100%;
+  border-radius: 10px;
+  border: 2px solid #d4af37;
+  transition: transform 0.3s;
+}
+
+.owner-profile:hover img {
+  transform: scale(1.05);
+}
+
+/* =========================================================
+   CART PAGE
+   ========================================================= */
+.cart {
+  max-width: 900px;
+  margin: 50px auto;
+  text-align: center;
+}
+
+.cart-buttons button {
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  border: none;
+  padding: 12px 20px;
+  font-weight: bold;
+  margin: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cart-buttons button:hover {
+  filter: brightness(1.2);
+}
+
+/* =========================================================
+   PRODUCT GALLERY POPUP - UPDATED
+   ========================================================= */
+.product-gallery {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.product-gallery.hidden {
+  display: none;
+}
+
+.gallery-content {
+  background: #111;
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 1400px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid #333;
+}
+
+.gallery-content h2 {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 30px;
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  font-size: 36px;
+  color: #d4af37;
+  cursor: pointer;
+  transition: 0.3s;
+  z-index: 10;
+}
+
+.close-btn:hover {
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+/* Gallery Grid Layout - 3-4 Column Responsive */
+.gallery-items {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 25px;
+  padding: 10px;
+}
+
+/* Product Card Styling */
+.product-card-gallery {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.product-card-gallery:hover {
+  transform: translateY(-5px);
+  border-color: #d4af37;
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+}
+
+/* Product Image Container */
+.product-card-gallery img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  object-position: center;
+  background: #000;
+  transition: transform 0.3s ease;
+}
+
+.product-card-gallery:hover img {
+  transform: scale(1.05);
+}
+
+/* Featured Tag */
+.featured-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  color: #000;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  z-index: 10;
+}
+
+/* Product Info Section */
+.product-info {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-grow: 1;
+}
+
+.product-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  line-height: 1.4;
+  min-height: 40px;
+}
+
+.product-desc {
+  font-size: 13px;
+  color: #999;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 40px;
+}
+
+/* Price Styling */
+.product-price {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.current-price {
+  font-size: 20px;
+  font-weight: 700;
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.original-price {
+  font-size: 14px;
+  color: #666;
+  text-decoration: line-through;
+}
+
+/* Stock Info */
+.stock-info {
+  font-size: 13px;
+  color: #27ae60;
+  font-weight: 500;
+  margin: 5px 0;
+}
+
+/* Add to Cart Button */
+.btn-add-cart {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: auto;
+}
+
+.btn-add-cart:hover:not(:disabled) {
+  filter: brightness(1.2);
+  transform: translateY(-2px);
+}
+
+.btn-add-cart:disabled {
+  background: #333;
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* Responsive Gallery - 3-4 Columns Based on Screen Size */
+@media (max-width: 1400px) {
+  .gallery-items {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .gallery-items {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  
+  .product-card-gallery img {
+    height: 250px;
+  }
+}
+
+/* ========== TESTIMONIALS SECTION ========== */
+#testimonials {
+  padding: 5rem 2rem;
+  background: #000;
+}
+
+.testimonial-title {
+  text-align: center;
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.testimonial-container {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.testimonial-box {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 25px;
+  width: 320px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.testimonial-box:hover {
+  transform: translateY(-5px);
+  border-color: #d4af37;
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.2);
+}
+
+.customer-photo {
+  margin-bottom: 15px;
+}
+
+.customer-photo img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
+  border: 3px solid #d4af37;
+  margin: 0 auto 10px;
+  display: block;
+}
+
+.customer-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #d4af37;
+  margin-top: 10px;
+}
+
+.star-rating {
+  margin: 15px 0;
+}
+
+.star-rating .checked {
+  color: #d4af37;
+  font-size: 1.2rem;
+}
+
+.testimonial-text {
+  font-size: 1rem;
+  color: #ddd;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* =========================================================
+   CONTACT SECTION
+   ========================================================= */
+.contacts-section {
+  padding: 50px;
+  text-align: center;
+}
+
+.feedback-form {
+  max-width: 500px;
+  margin: auto;
+  text-align: left;
+}
+
+.feedback-form textarea {
+  width: 100%;
+  height: 120px;
+  padding: 10px;
+  background: #111;
+  border: 1px solid #333;
+  color: #fff;
+  border-radius: 6px;
+}
+
+.feedback-form button {
+  margin-top: 10px;
+  background: linear-gradient(45deg, #d4af37, #b8860b);
+  padding: 10px 20px;
+  border: none;
+  color: #000;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.feedback-form button:hover {
+  filter: brightness(1.2);
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  background: #000;
+  border-top: 1px solid #333;
+}
+
+.contact-info {
+  margin-bottom: 15px;
+}
+
+.contact-info p {
+  margin: 5px 0;
+  color: #ddd;
+}
