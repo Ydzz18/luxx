@@ -1,7 +1,12 @@
 <?php
 require_once 'config.php';
 require_once 'Product.php';
-require_once 'mailer.php';
+require_once 'Settings.php';
+
+// Make mailer optional
+if (file_exists('mailer.php')) {
+    require_once 'mailer.php';
+}
 
 class Order {
     private $db;
@@ -136,15 +141,17 @@ class Order {
             
             // Send email notifications (don't fail order if email fails)
             try {
-                $mailer = new Mailer();
-                $orderData = $this->getById($orderId);
-                $orderItems = $this->getItems($orderId);
-                
-                // Send confirmation to customer
-                $mailer->sendOrderConfirmation($orderData, $orderItems);
-                
-                // Send notification to admin
-                $mailer->sendAdminOrderNotification($orderData, $orderItems);
+                if (class_exists('Mailer')) {
+                    $mailer = new Mailer();
+                    $orderData = $this->getById($orderId);
+                    $orderItems = $this->getItems($orderId);
+                    
+                    // Send confirmation to customer
+                    $mailer->sendOrderConfirmation($orderData, $orderItems);
+                    
+                    // Send notification to admin
+                    $mailer->sendAdminOrderNotification($orderData, $orderItems);
+                }
             } catch (Exception $e) {
                 error_log("Email notification failed: " . $e->getMessage());
             }
@@ -273,7 +280,7 @@ class Order {
             $result = $stmt->execute([$status, $orderId]);
             
             // Send status update email
-            if ($result && $sendEmail) {
+            if ($result && $sendEmail && class_exists('Mailer')) {
                 try {
                     $order = $this->getById($orderId);
                     $mailer = new Mailer();
@@ -306,7 +313,7 @@ class Order {
     }
     
     /**
-     * Get order statistics (admin dashboard) - FIXED WITH ERROR HANDLING
+     * Get order statistics (admin dashboard)
      */
     public function getStats() {
         try {
@@ -321,17 +328,11 @@ class Order {
             
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            // Ensure all values exist and are properly typed
-            $totalOrders = (int)($result['total_orders'] ?? 0);
-            $totalRevenue = (float)($result['total_revenue'] ?? 0);
-            $pendingOrders = (int)($result['pending_orders'] ?? 0);
-            $avgOrderValue = (float)($result['avg_order_value'] ?? 0);
-            
             return [
-                'total_orders' => $totalOrders,
-                'total_revenue' => $totalRevenue,
-                'pending_orders' => $pendingOrders,
-                'avg_order_value' => $avgOrderValue
+                'total_orders' => (int)($result['total_orders'] ?? 0),
+                'total_revenue' => (float)($result['total_revenue'] ?? 0),
+                'pending_orders' => (int)($result['pending_orders'] ?? 0),
+                'avg_order_value' => (float)($result['avg_order_value'] ?? 0)
             ];
             
         } catch (PDOException $e) {
@@ -345,4 +346,3 @@ class Order {
         }
     }
 }
-?>

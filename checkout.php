@@ -1,6 +1,6 @@
 <?php
 require_once 'config.php';
-require_once 'Cart.php';
+require_once 'CartClass.php';
 
 if (!isLoggedIn()) {
     header('Location: login.php');
