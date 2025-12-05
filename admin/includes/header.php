@@ -18,7 +18,7 @@ $pageStyles = $pageStyles ?? '';
 </head>
 <body>
     <div class="admin-wrapper">
-        <?php include __DIR__ . '/../sidebar.php'; ?>
+        <?php include 'sidebar.php'; ?>
         
         <main class="admin-main">
             <header class="admin-header">

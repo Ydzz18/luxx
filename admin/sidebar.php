@@ -22,18 +22,6 @@ if (!function_exists('canDo')) {
         <?php if (canDo('orders', 'view')): ?>
         <a href="orders.php" class="<?= $currentPage === 'orders' ? 'active' : '' ?>">
             <span class="icon">📦</span> Orders
-            <?php
-            try {
-                require_once __DIR__ . '/../Order.php';  // This stays the same - goes to project root
-                $o = new Order();
-                $s = $o->getStats();
-                if (isset($s['pending_orders']) && $s['pending_orders'] > 0): ?>
-                <span class="badge"><?= $s['pending_orders'] ?></span>
-                <?php endif;
-            } catch (Exception $e) {
-                // Silently fail if Order class unavailable
-            }
-            ?>
         </a>
         <?php endif; ?>
         
@@ -62,18 +50,6 @@ if (!function_exists('canDo')) {
         <?php if (canDo('feedback', 'view')): ?>
         <a href="feedback.php" class="<?= $currentPage === 'feedback' ? 'active' : '' ?>">
             <span class="icon">💬</span> Feedback
-            <?php
-            try {
-                require_once __DIR__ . '/../Feedback.php';  // This stays the same - goes to project root
-                $fb = new Feedback();
-                $fbCounts = $fb->getCounts();
-                if (isset($fbCounts['new']) && $fbCounts['new'] > 0): ?>
-                <span class="badge"><?= $fbCounts['new'] ?></span>
-                <?php endif;
-            } catch (Exception $e) {
-                // Silently fail if Feedback class unavailable
-            }
-            ?>
         </a>
         <?php endif; ?>
         
